@@ -1,0 +1,78 @@
+# .cursorrules
+
+name: "ObsidianVideoSummarizer"
+version: "2.0.0"
+description: >
+  该文件定义了整个视频分析与总结的流程，包含：
+   1. 下载字幕
+   2. 分析字幕并提取关键信息
+   3. 基于 video_template.md 生成最终中文报告
+
+rules:
+
+  # 1. Subtitles Download
+  - name: "Download Subtitles"
+    description: >
+      使用 yt-dlp 从 YouTube 获取字幕。优先下载中文（zh / zh-CN / zh-Hans），
+      如果无中文则使用英文（en）。
+    command: |
+      pdm run yt-dlp \
+        --proxy 0.0.0.0:1087 \
+        --skip-download \
+        --write-auto-subs \
+        --sub-format vtt \
+        --convert-subs vtt \
+        --write-subs \
+        --sub-lang "zh,zh-CN,zh-Hans,en" \
+        --output "video_analysis/%(id)s/%(title)s.%(ext)s" \
+        $VIDEO_URL
+
+  # 2. Analysis & Information Extraction
+  - name: "Analyze Subtitles & Extract Information"
+    description: >
+      从下载的字幕文件中提取关键内容，生成分析数据。该过程的目标包括：
+       - 将英文标题翻译或改写成中文
+       - 获取视频基础信息（时长、发布时间、链接等）
+       - 写出一句话总结（不少于 50 字，不分行）
+       - 总结出内容摘要与要点，以便后续填充思维导图和详细描述
+    steps:
+      - "读取并清理 .vtt / .srt 字幕文件，去除时间轴与冗余"
+      - "获取视频的标题、视频链接、时长、发布时间等基础信息"
+      - "如标题是英文，翻译或简写成中文，后续统一使用中文"
+      - "根据字幕内容，初步归纳：主要观点、关键信息、实用技巧"
+      - "形成一句话介绍（≥50字），要确保不分行"
+      - |
+        生成思维导图节点时：
+         1) 至少包含 **三层级** 结构：root -> 主分支 -> 子分支(可加子子分支)。
+         2) 覆盖视频的引言/背景、章节划分、核心观点、重要案例或技术点、应用场景、未来发展/总结等方面。
+         3) 确保每个主分支下面有2~3个子节点，子节点中尽量根据字幕或视频细分具体要点。
+      - "生成不少于1000字的详细描述材料或草稿，用于后续模板渲染"
+
+  # 3. Generate Final Summary
+  - name: "Generate Final Summary"
+    description: >
+      基于上一步的提炼内容，套用 video_template.md 生成最终报告。  
+      要求：
+       - 标题：中文
+       - 一句话介绍：≥50字，单行
+       - 思维导图：至少四级节点
+       - 视频详细描述：≥1000字，条理清晰，帮助读者深入理解视频
+       - 命名：{Y-m-d} {视频中文简述} - 总结.md
+       - 格式要求：
+         - 不使用H1标题（文件名即为标题）
+         - 视频播放部分使用简化格式：![{{Title}}]({{URL}})
+         - 详细描述部分需包含：
+           * 视频背景
+           * 核心观点
+           * 数据/案例
+           * 应用场景
+           * 未来趋势
+           * 个人思考
+    steps:
+      - "读取分析提炼的所有数据（视频标题、时长、发布时间、链接、关键信息、脑图节点等）"
+      - "调用 video_template.md，将信息分别填入对应的占位符"
+      - "生成最终文档，文件名满足：`{Y-m-d} {视频中文简述} - 总结.md`"
+      - "确保 mindmap 至少有 3 级层次，每个主分支有 2~3 个子节点"
+      - "保存到 `video_analysis/{video_id}/` 目录"
+      - "将总结文件归档到 Obsidian 工作日记目录：`{{ obsidian 目录 }} 视频总结`"
+      - "确保文档格式符合Obsidian使用规范"
