@@ -35,37 +35,9 @@
 
 ### 使用
 
-1. 在 IDE 中加载 `ide-ai-rules` 插件或扩展。
-2. 配置 `cline rules` 和 `cursorline` 设置：
-   - 打开设置面板，找到 `Cline Rules` 选项，添加或修改规则。
-   - 启用 `Cursorline Highlighting`，自定义高亮颜色和样式。
-3. 开始编码，享受 AI 驱动的智能提示和规则管理！
+1. 在 IDE 根目录配置适合的 .clinerules 和 .cursorrules 文件。
+2. 开始编码，享受 AI 驱动的智能提示和规则管理！
 
----
-
-## 示例
-
-### 配置 Cline Rules
-```json
-{
-  "cline_rules": {
-    "max_line_length": 80,
-    "indent_size": 4,
-    "trailing_whitespace": "remove"
-  }
-}
-```
-
-### 启用 Cursorline Highlighting
-```json
-{
-  "cursorline": {
-    "enable": true,
-    "color": "#FFD700",
-    "style": "underline"
-  }
-}
-```
 
 ---
 
